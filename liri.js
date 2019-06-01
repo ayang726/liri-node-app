@@ -44,6 +44,7 @@ function getInput(command, value) {
                 break;
         }
     }
+
 }
 function readme() {
     console.log(`
@@ -65,29 +66,33 @@ function readme() {
 
     node liri.js do-what-it-says
     `);
+    logger("Command Missing...");
 }
 
 function concertThis(artist) {
     // console.log(`Artist is ${artist}`);
-    artist = artist.split(" ").join("+");
+    artistStr = artist.split(" ").join("+");
     // console.log(artist);
 
-    const url = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
+    const url = "https://rest.bandsintown.com/artists/" + artistStr + "/events?app_id=codingbootcamp";
     axios.get(url).then(res => {
         if (res.data.length === 0) {
             console.log('Events not found...');
         } else {
-            console.log(`
-        ===============================================================
-        ${artist} have the following concert events coming up
-        ===============================================================`);
+            let result = `
+            ===============================================================
+            ${artist} have the following concert events coming up
+            ===============================================================
+            `
             res.data.forEach(event => {
-                console.log(`
-            Name of the Venue: ${event.venue.name},
-            Venue Location: ${event.venue.city}, ${event.venue.region}, ${event.venue.country}
-            Date: ${moment(new Date(event.datetime)).format("MM/DD/YYYY")}
-            `);
+                result += `
+                Name of the Venue: ${event.venue.name},
+                Venue Location: ${event.venue.city}, ${event.venue.region}, ${event.venue.country}
+                Date: ${moment(new Date(event.datetime)).format("MM/DD/YYYY")}
+                `
             });
+            console.log(result);
+            logger("Concert This", artist, result);
         }
     });
 }
@@ -99,36 +104,32 @@ function spotifyThisSong(title) {
         if (err) {
             return console.log('Error occurred: ' + err);
         }
-
-        console.log(`
+        let result = `
         ===============================================================================
         There are ${data.tracks.total} tracks with the name ${title} in Spotify
         Here are the top ${data.tracks.items.length}
         ===============================================================================
-        `);
+        `
         data.tracks.items.forEach(song => {
-            console.log(song);
-
-            console.log(`
+            result += `
             Artist(s): ${song.artists.reduce((acc, curr) => acc += curr.name + ", ", "")}
             Name: ${song.name},
             Album: ${song.album.name}
-            Preview Url: ${song.preview_url},
-            
-            `);
+            Preview Url: ${song.preview_url}, `
         });
+        console.log(result);
+        logger("Spotify This Song", title, result);
     });
 }
 
 function movieThis(title) {
     // console.log(title);
-    title = title.split(" ").join("+");
+    titleStr = title.split(" ").join("+");
     // console.log(title);
-    const url = `http://www.omdbapi.com/?apikey=trilogy&t=${title}`;
+    const url = `http://www.omdbapi.com/?apikey=trilogy&t=${titleStr}`;
     axios.get(url).then(res => {
         const data = res.data;
-
-        console.log(`
+        let result = `
         ================================================
                         Result Found:
         ================================================
@@ -140,7 +141,9 @@ function movieThis(title) {
         * Language: ${data.Language},
         * Actors: ${data.Actors},
         * Plot: ${data.Plot}
-        `);
+        `
+        console.log(result);
+        logger("Movie This", title, result);
     });
 
 }
@@ -154,6 +157,29 @@ function doWhatItSays() {
             const command = data.split(",")[0];
             const value = data.split(",")[1];
             getInput(command, value);
+            const result = `
+            ====================================================================================
+            Do what it says command issued: ${command}, ${value}
+            For result see below
+            ====================================================================================
+            `
+            logger("Do What It Says", "", result);
+        }
+    });
+}
+
+function logger(command, value, result) {
+    let data = `
+    ====================================================================================
+    Time:${moment(new Date())}
+    Command: ${command}, Value: ${value},
+    Response Data:
+    ${result}
+    ====================================================================================
+    `
+    fs.appendFile("./log.txt", data, function (err) {
+        if (err) {
+            console.log(err);
         }
     });
 }
