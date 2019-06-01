@@ -27,3 +27,9 @@ Or a movie:
 If you would like to access pre-programmed random commands,you could do so using this line:
 
     node liri.js do-what-it-says
+
+## Other Features
+ #### random.txt
+ Consists of a pre-programmed command and value, this can be changed by the user as desired.
+ #### log.txt
+ All previous inquiries are stored in this log file along with their results.
